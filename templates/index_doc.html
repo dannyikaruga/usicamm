@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Extractor de Requisitos USICAMM</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        <img src="/static/escudo.png" alt="Escudo">
+        Extractor de Requisitos
+    </div>
+    <div id="chat-box"></div>
+    <div class="input-container">
+        <input type="file" id="pdfFile" accept="application/pdf">
+        <button id="uploadBtn">⬆</button>
+        <button id="processBtn">▶</button>
+    </div>
+</div>
+<script>
+document.getElementById("uploadBtn").onclick = async () => {
+    let fileInput = document.getElementById("pdfFile");
+    if (!fileInput.files.length) return alert("Selecciona un PDF primero.");
+    let formData = new FormData();
+    formData.append("pdf", fileInput.files[0]);
+    let res = await fetch("/upload", {method: "POST", body: formData});
+    let data = await res.json();
+    addMessage(data.message || data.error, "bot");
+};
+
+document.getElementById("processBtn").onclick = async () => {
+    addMessage("Procesando PDFs...", "bot");
+    let res = await fetch("/process", {method: "POST"});
+    let data = await res.json();
+    data.logs.forEach(log => addMessage(log, "bot"));
+};
+
+function addMessage(text, sender) {
+    let chatBox = document.getElementById("chat-box");
+    let msg = document.createElement("div");
+    msg.classList.add("message", sender);
+    msg.innerText = text;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+</body>
+</html>
